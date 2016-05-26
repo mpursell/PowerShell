@@ -1,0 +1,1 @@
+Module to test out advanced functions, module, and custom output views with a manifest file.

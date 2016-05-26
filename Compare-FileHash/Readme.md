@@ -1,0 +1,1 @@
+Quick and dirty module to compare file hashes.

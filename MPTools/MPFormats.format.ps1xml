@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+    <ViewDefinitions>
+        <View>
+            <Name>MPSystemInfo</Name>
+            <ViewSelectedBy>
+                <TypeName>MP.SystemInfo</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader />
+                    <TableColumnHeader>
+                        <Label>Manufac.</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader />
+                    <TableColumnHeader>
+                        <Label>Windows Version</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>ComputerName</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Manufacturer</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Model</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>OSVersion</PropertyName>
+                            </TableColumnItem>
+                           </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+</ViewDefinitions>
+</Configuration>
+    

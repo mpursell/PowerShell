@@ -1,0 +1,3 @@
+Module to copy and split the drivers in MDT out into respective model folders.
+
+NOTE: Since MDT only imports each driver once, and any further references are just pointers to that driver; and this module makes a new copy of a driver for each model, the worst case is that the final set of model folders will be exponentially larger than the original Out-Of-Box-Drivers folder.  The exponent will depend upon how many drivers are actually shared between models. 
