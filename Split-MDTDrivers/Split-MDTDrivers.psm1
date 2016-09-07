@@ -3,7 +3,7 @@
 
     <#
     .SYNOPSIS
-    CmdLet to lookup drivers in MDT xml files and split the drivers out to a destination folder, by model name
+    Cmdlet to lookup drivers in MDT xml files and split the drivers out to a destination folder, by model name
 
     .DESCRIPTION
     Takes a deployment share path and a driver destination path.  Uses the \Control\DriverGroups.xml to create 
@@ -23,14 +23,18 @@
     Path to the deployment share to be parsed, without the trailing slash. 
 
     .PARAMETER Models
-    Accepts a comma seperated list of model numbers.  Letter case matters. Checks if the driver name CONTAINS the
+    Accepts a single model number / name or comma seperated list of model numbers / names. Checks if the driver name CONTAINS the
     model name, so T540 will capture T540p, T540, T540s etc. 
 
+    .PARAMETER INFonly
+    Just copies the inf files from the deployment share.  Leave this parameter unspecified if all the content from the driver folders
+    is required. 
+
     .EXAMPLE
-    Split-MDTDrivers -DeploymentSharePath \\server\deploymentshare$ -DriverDestinationPath C:\users\%username%\Documents\DriverTest
+    Split-MDTDrivers -DeploymentSharePath \\server\deploymentshare$ -DriverDestinationPath C:\users\<username>\Documents\DriverTest -Model x230
 
     .INPUTS
-    Accepts NO pipeline input
+    Accepts the DeploymentSharePath from the pipline
 
     .OUTPUTS
     Outputs the list of folders created
@@ -44,18 +48,38 @@
             [Parameter(Mandatory=$True)]
             [string]$DriverDestinationPath,
 
-            [Parameter(Mandatory=$True)]
+            [Parameter(Mandatory=$True,
+                        ValueFromPipeline=$True,
+                        ValueFromPipelineByPropertyName=$True)]
             [string]$DeploymentSharePath,
 
-            [Parameter(Mandatory=$false)]
-            [string[]]$Models
+            [Parameter(Mandatory=$True)]
+            [string[]]$Models,
+
+            [Parameter(Mandatory=$False)]
+            [switch]$INFOnly
         )
 
     Write-Verbose "Setting DriverGroups.xml path to: $DeploymentSharePath\Control\drivergroups.xml"
     Write-Verbose "Setting Driver.xml path to: $DeploymentSharePath\Control\drivers.xml"
 
-    [xml]$dg = Get-Content -Path "$DeploymentSharePath\Control\drivergroups.xml"
-    [xml]$drivers = Get-Content -Path "$DeploymentSharePath\Control\drivers.xml"
+
+    try{
+
+        Write-Verbose "Getting the DriverGroups.xml file from $DeploymentSharePath\Control\drivergroups.xml"
+        [xml]$dg = Get-Content -Path "$DeploymentSharePath\Control\drivergroups.xml"
+
+        Write-Verbose "Getting the Driver.xml file from $DeploymentSharePath\Control\drivers.xml"
+        [xml]$drivers = Get-Content -Path "$DeploymentSharePath\Control\drivers.xml"
+
+    }catch{
+
+        Write-Warning "Check your path is correct.  Path is currently: $DeploymentSharePath"
+        Write-Verbose "Exiting script"
+        Break
+
+    }
+
 
     New-PSDrive -Name X -PSProvider FileSystem -Root $deploymentSharePath
 
@@ -66,17 +90,23 @@
     
         foreach($model in $Models)
         {
-            if($entry.Item2.Name.Contains($model))
+            # if the second item in the 3-tuple matches $model, upper or lower case
+            if($entry.Item2.Name.Contains($model) -or $entry.Item2.Name.Contains($model.ToUpper()) -or $entry.Item2.Name.Contains($model.ToLower())) 
             {
 
 
-                #remove the leading .\ from the out-of-box-drivers path
+                # remove the leading .\ from the out-of-box-drivers path
                 $source = "X:\" + $entry.Item3.TrimStart(".\")
 
-                # split the string at the backslashes, then remove the last [-1] string from the string
-                # so dir\folder\file.inf becomes dir\folder.
-                # this is because we want to copy everything in the driver folder not just the inf file
-                $source = $source.TrimEnd($source.split('\')[-1])
+                # if INFonly is not set, capture everything from the driver folder
+                if(!$INFOnly){
+                
+                    # split the string at the backslashes, then remove the last [-1] substring from the string
+                    # so dir\folder\file.inf becomes dir\folder.
+                    # this is because we want to copy everything in the driver folder not just the inf file
+                    $source = $source.TrimEnd($source.split('\')[-1])
+
+                }
 
                 $Destination = "$DriverDestinationPath\" + $entry.item2.Name
 
@@ -85,12 +115,14 @@
                 # create a new model folder if one doesn't already exist
                 if($checkDestination -eq $false)
                 {
-                    New-Item -ItemType Directory -Path $Destination
+                    New-Item -ItemType Directory -Path $Destination | Select-Object -Property FullName
+                    Copy-Item -Path "$source\*.*" -Destination $Destination
+
+                }else{
+
+                    # copy all files from the source path into the model folder
+                    Copy-Item -Path "$source\*.*" -Destination $Destination
                 }
-
-                # copy all files from the source path into the model folder
-                Copy-Item -Path "$source\*.*" -Destination $Destination
-
 
             }
 
@@ -99,13 +131,15 @@
         
     }
 
+    # kill the PSDrive after we've finished
     Remove-PSDrive -Name X
 
 }
 
 
-function nameGuidList()
-    {
+Function nameGuidList()
+# create a list of tuples ([path,guid],[path,guid]) etc.
+{
 
     $nameGuidTupleList = @()
 
@@ -126,7 +160,7 @@ function nameGuidList()
             foreach($guid in $guidList)
             {
           
-                # create a tuple of - e.g. [\x64\7\lenovo\thinkpad x250\w6472td, {3cvfjs-3389v-etc.}]
+                # create a tuple of [\x64\7\lenovo\thinkpad x250\w6472td, {3cvfjs-3389v-etc.}]
                 # and add it to the list nameGuid
                 $nameTuple = [System.Tuple]::Create($nodename, $guid)
            
@@ -141,23 +175,8 @@ function nameGuidList()
 
 }
 
-function driverSourceList()
-{
-    $driversList = @()
-
-    foreach($driver in $drivers.drivers.driver)
-    {
-        # create a tuple of (guid, source) and add it to a list
-        $driverTuple = [System.Tuple]::Create($driver.Guid, $driver.Source)
-           
-        $driversList += ($driverTuple)
-        
-
-    }
-    return $driversList
-}
-
-function driverSourceHash()
+Function driverSourceHash()
+# create a drivers hash table
 {
     $driversHash = @{}
 
@@ -171,9 +190,10 @@ function driverSourceHash()
 }
 
 
-function getFinalTupleList()
+Function getFinalTupleList()
 # uses the hash table from drivers.xml and looks up the key from the
-# tuple list created from drivergroups.xml
+# tuple list created from drivergroups.xml.  
+# create a list of 3-tuples ([guid, modelname, path to driver],[guid, modelname, path to driver], etc.)
 
 {
 
@@ -192,14 +212,5 @@ function getFinalTupleList()
 
     return $finalTupleList
 }
-
-
-
-
-### TEST FUNCTION CALLS ###
-#Split-MDTDrivers -DeploymentSharePath \\127.0.0.1\deploy$ -DriverDestinationPath C:\users\env:username\Documents\DriverTest
-#nameGuidList
-#driverSourceList
-#driverSourceHash
 
 
