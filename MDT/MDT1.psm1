@@ -12,14 +12,13 @@ Function Get-MDTAppName{
     guid string to search the xml. 
 
     .PARAMETER Path
-    Path to the root of the deployment share, shortened to either Win7 or Win8.  If neither is specified
-    it will default to the Win7 path \\0.0.0.0\DeployShare1$
+    Path to the root of the deployment share
 
     .PARAMETER Guid
     Partial or complete guid of the application
 
     .EXAMPLE
-    Get-MDTAppNameFromGUID -Path Win7 -Guid 'r92f' 
+    Get-MDTAppNameFromGUID -Path \\server\DeploymentShare -Guid 'r92f' 
 
     .INPUTS
     Accepts pipeline input for the Guid parameter
@@ -42,30 +41,16 @@ Function Get-MDTAppName{
         [string]$Guid
     )
 
-    if($Path -eq "Win7"){
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\Applications.xml"
-        Write-Verbose "Path set to $realPath"
-
-    } elseif($Path -eq "Win8"){
-        
-        $realPath = "\\0.0.0.0\DeployShare2$\Control\Applications.xml"
-        Write-Verbose "Path set to $realPath"
-
-    } else{
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\Applications.xml"
-        Write-Verbose "Path set to $realPath"
-    }
+    
 
     try{
         
         Write-Verbose "Getting the xml file"
-        $Search = [xml]$xml = Get-Content -Path $realPath -ErrorAction Stop
+        $Search = [xml]$xml = Get-Content -Path $Path -ErrorAction Stop
 
     } catch{
 
-        Write-Warning "Check your path is correct.  Path is currently: $realPath"
+        Write-Warning "Check your path is correct.  Path is currently: $Path"
         Write-Verbose "Exiting script"
         Break
 
@@ -105,14 +90,13 @@ Function Get-MDTAppGuid{
     name string to search the xml. 
 
     .PARAMETER Path
-    Path to the root of the deployment share, shortened to either Win7 or Win8.  If neither is specified
-    it will default to the Win7 path \\0.0.0.0\DeployShare1$
+    Path to the root of the deployment share
 
     .PARAMETER name
     Partial or complete name of the application
 
     .EXAMPLE
-    Get-MDTAppGuidFromName -Path Win7 -Name 'Microsoft*' 
+    Get-MDTAppGuidFromName -Path \\server\DeploymentShare -Name 'Microsoft*' 
 
     .INPUTS
     Accepts pipeline input for the Name parameter
@@ -135,30 +119,16 @@ Function Get-MDTAppGuid{
         [string]$Name
     )
 
-    if($Path -eq "Win7"){
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\Applications.xml"
-        Write-Verbose "Path set to $realPath"
-
-    } elseif($Path -eq "Win8"){
-        
-        $realPath = "\\0.0.0.0\DeployShare2$\Control\Applications.xml"
-        Write-Verbose "Path set to $realPath"
-
-    } else{
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\Applications.xml"
-        Write-Verbose "Path set to $realPath"
-    }
+    
 
     try{
         
         Write-Verbose "Getting the xml file"
-        [xml]$xml = Get-Content -Path $realPath -ErrorAction Stop
+        [xml]$xml = Get-Content -Path $Path -ErrorAction Stop
 
     } catch{
 
-        Write-Warning "Check your path is correct.  Path is currently: $realPath"
+        Write-Warning "Check your path is correct.  Path is currently: $Path"
         Write-Verbose "Exiting script"
         Break
 
@@ -234,28 +204,13 @@ Function Get-MDTAppLocation{
             [string[]]$Guid
         )
 
-    if($Path -eq "Win7"){
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\"
-        Write-Verbose "Path set to $realPath"
-
-    } elseif($Path -eq "Win8"){
-        
-        $realPath = "\\0.0.0.0\DeployShare2$\Control\"
-        Write-Verbose "Path set to $realPath"
-
-    } else{
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\"
-        Write-Verbose "Path set to $realPath"
-    }
 
 
     if($Guid){
 
         foreach($id in $guid){
         
-            $tsSearch = Get-ChildItem -path $realPath -Recurse -Filter *.xml | select-string -Pattern "$id" | 
+            $tsSearch = Get-ChildItem -path $Path -Recurse -Filter *.xml | select-string -Pattern "$id" | 
             select filename, path | where{$_.filename -ne "ApplicationGroups.xml"  -and $_.filename -ne "Applications.xml"  -and $_.filename -ne "Applications - copy.xml"}
         
             if($tsSearch){
@@ -321,24 +276,10 @@ Function Get-MDTSupportedModel{
             
         )
 
-    if($Path -eq "Win7"){
-
-        $realPath = "\\0.0.0.0\DeployShare1$\Control\"
-        Write-Verbose "Path set to $realPath"
-
-    } elseif($Path -eq "Win8"){
-        
-        $realPath = "\\0.0.0.0\DeployShare2$\Control\"
-        Write-Verbose "Path set to $realPath"
-
-    } else{
-
-        $realPath = "$Path\Control\"
-        Write-Verbose "Path set to $realPath"
-    }
 
 
-    [xml]$xml = get-content "$realPath\DriverGroups.xml"
+
+    [xml]$xml = get-content "$Path\DriverGroups.xml"
 
     foreach($Variant in $Variants){
      
@@ -364,7 +305,7 @@ Function Get-MDTSupportedModel{
 
         }else{
 
-            Write-Warning "No matching models found for $Variant at $realPath DriverGroups.xml"
+            Write-Warning "No matching models found for $Variant at $Path DriverGroups.xml"
         }
    
         
