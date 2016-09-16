@@ -18,11 +18,11 @@
     Personal Google API key for Youtube.com
 
     .EXAMPLE
-    Get-YoutubePlaylist -PlayListID PL2103FD9F9D0615B7
+    Get-YoutubePlaylist -PlayListID PL2103FD9F9D0615B7 -ApiKey <apikey>
 
     .EXAMPLE
 
-    Get-YoutubePlaylist -PlayListID PL2103FD9F9D0615B7 -Download
+    Get-YoutubePlaylist -PlayListID PL2103FD9F9D0615B7 -Download -ApiKey <apikey>
     
 
 #>
@@ -44,7 +44,7 @@
 
     
     
-    $youtubeDl = "C:\Users\sa_pursellm\Downloads\youtube-dl.exe"
+    $youtubeDl = "C:\Users\%username%\Downloads\youtube-dl.exe"
 
     Write-Debug "Api key set to $apiKey"
     Write-Debug "YoutubeDl location set to $youtubeDl"
