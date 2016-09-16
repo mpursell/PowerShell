@@ -3,7 +3,7 @@
     <#
     .SYNOPSIS
     CmdLet to compare file hashes
-    Written by Michael Pursell, Capita ITES 18/02/201
+    
 
     .DESCRIPTION
     Takes a Path parameter (to generate the current hash), and a BaseLineHash parameter.  The 
@@ -65,6 +65,6 @@
 }
 
 
-Compare-FileHash -Path C:\users\sa_pursellm\Documents\test.txt -BaselineHash $hash -Algorithm MD5
+
 
 
