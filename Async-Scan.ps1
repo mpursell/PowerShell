@@ -65,7 +65,7 @@ Function Async-Scan{
 
 
 
-Function Linear-Scan{
+Function Sync-Scan{
 
     $ipRange = ('10.93.128.6','10.93.128.9','10.93.128.10')
     $ports = 1..100
@@ -99,4 +99,4 @@ Function Linear-Scan{
 }
 
 Measure-Command{Async-Scan}
-#Measure-Command{Linear-Scan}
+#Measure-Command{Sync-Scan}
