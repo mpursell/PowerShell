@@ -19,6 +19,7 @@
             If($prop -match "StubPath"){
             
                 $propPath = $prop.PSPath
+                $childPath = $prop.PSChildName
                 $stubvalue = $prop.StubPath
 
                  # writes out the stub path to console
@@ -27,8 +28,8 @@
                 
                 try{
 
-                    Set-ItemProperty -Path $prop.PSPath -Name StubPath -Value "" -ErrorAction Stop -Force
-                    Write-Log "Success... Removed $propPath\StubPath\$stubvalue"
+                    Set-ItemProperty -Path "$registrypath\$childpath" -Name StubPath -Value "" -ErrorAction Stop -Force
+                    Write-Log "Success... Removed $registrypath\$childpath\StubPath\$stubvalue"
 
                 }catch{
                     
