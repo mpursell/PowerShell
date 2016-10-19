@@ -1,4 +1,4 @@
-﻿function Get-RegStubPaths($registryPath){
+﻿function Set-RegStubPaths($registryPath){
 
     # set our reg location and enumerate all the child keys of that key
     Set-Location $registryPath 
@@ -112,6 +112,21 @@ function Prevent-OutlookIndexing{
     }
 }
 
+function Disable-WindowsMaintenance{
+
+    try{
+        
+        New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" -Name MaintenanceDisabled -PropertyType DWord -Value 1 -ErrorAction Stop | Out-Null
+        Write-Log "Success... Disable WindowsMaintenance"
+
+    }catch{
+        
+        $errorMessage = $_.Exception.Message
+        Write-Log "Failure... Exception thrown in Disable-WindowsMaintenance; $errorMessage"
+
+    }
+}
+
 
 
 
@@ -136,12 +151,13 @@ function Write-Log($text){
 
 }
 
-Get-RegStubPaths "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\"
-Get-RegStubPaths "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components\"
+Set-RegStubPaths "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\"
+Set-RegStubPaths "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components\"
 Disable-UAC
 Disable-WindowsFirewall
 Install-DesktopExperience
 Prevent-OutlookIndexing
+#Disable-WindowsMaintenance
 
 
 
