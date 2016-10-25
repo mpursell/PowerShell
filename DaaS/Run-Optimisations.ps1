@@ -155,7 +155,7 @@ Set-RegStubPaths "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\"
 Set-RegStubPaths "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components\"
 Disable-UAC
 Disable-WindowsFirewall
-Install-DesktopExperience
+#Install-DesktopExperience
 Prevent-OutlookIndexing
 #Disable-WindowsMaintenance
 
