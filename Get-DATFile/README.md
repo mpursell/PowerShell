@@ -1,0 +1,1 @@
+Script to download DAT files from McAfee FTP server, extract them and copy to a staging folder.
