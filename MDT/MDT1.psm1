@@ -444,3 +444,65 @@ Function Get-MDTComputers{
     Write-Host "Finished" -BackgroundColor Green
 
 }
+
+
+function Get-MDTApps{
+
+[CmdletBinding()]
+    param(
+
+        [Parameter(Mandatory=$true, ValueFromPipeLine=$true)][string]$Location,
+        [Parameter(Mandatory=$true, ValueFromPipeLine=$true)][string]$Share,
+        [Parameter(Mandatory=$true, ValueFromPipeLine=$true)][string]$AppName
+        
+        )
+
+
+    BEGIN{
+
+        if (($location -eq "Ruddington") -and ($Share -eq "Win7")){
+
+            $PSDriveRoot = "\\10.93.211.18\mdsdevelopment$\Applications"
+        }
+        elseif(($location -eq "Ruddington") -and ($Share -eq "Win8")){
+            
+            $PSDriveRoot = "\\10.93.211.18\win8$\Applications"
+
+        }
+        elseif(($location -eq "Finch") -and ($Share -eq "Win7")){
+
+            $Root = "\\10.93.128.9\mdsdevelopment$\Applications"
+        }
+        elseif(($location -eq "Finch") -and ($Share -eq "Win8")){
+
+            $Root = "\\10.93.128.10\win8$\Applications"
+        }
+        else{
+
+            $Root = "$location\$Share"
+        }
+
+    }
+
+    PROCESS{
+
+        New-PSDrive -Name Z -Root $PSDriveRoot -PSProvider FileSystem | Out-Null
+
+        $folders = Get-ChildItem Z:\
+
+        Foreach ($folder in $folders){
+
+            if($folder.name -like "*$AppName*"){
+
+                Write-Output $folder.name
+            }
+        }
+    }
+
+    END{
+
+        Remove-PSDrive -Name Z
+    }
+}
+
+
