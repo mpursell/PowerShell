@@ -1,7 +1,7 @@
 ﻿function Get-Downloads{
 
     # requires a .csv in the format name,url where name is a convenient name for the application / file
-    # and url is the path to download the application / file
+    # and url is the path to download the application / file.
 
     [CmdletBinding()]
 
