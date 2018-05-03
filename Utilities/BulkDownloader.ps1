@@ -8,7 +8,7 @@ function Get-Downloads{
     [CmdletBinding()]
 
     param(
-    # Parameter help description
+    
     [Parameter(Mandatory=$true)][string] $RootDownloadDirectory,
     [Parameter(Mandatory=$true)][string] $CSVFile
     )
