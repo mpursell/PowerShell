@@ -1,4 +1,6 @@
-﻿function Get-Downloads{
+﻿# M. Pursell 03.05.18
+
+function Get-Downloads{
 
     # requires a .csv in the format name,url where name is a convenient name for the application / file
     # and url is the path to download the application / file.

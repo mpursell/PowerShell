@@ -1,3 +1,4 @@
+# M. Pursell 03.05.18
 function Write-Log($text){
 
         $path = "<path to log file>"
