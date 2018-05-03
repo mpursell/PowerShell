@@ -1,7 +1,7 @@
 function Write-Log($text){
 
-        $path = "E:\Script_Logs\"
-        $logfile = "Rebuild-VMs.log"
+        $path = "<path to log file>"
+        $logfile = "<logfile name>"
         $fullpath = "$path\$logfile"
         $date = Get-Date
 
