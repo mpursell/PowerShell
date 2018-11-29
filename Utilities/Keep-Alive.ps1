@@ -1,12 +1,12 @@
-﻿param($minutes = 10000)
-
+﻿param($minutes = 100000)
 $myshell = New-Object -com "Wscript.Shell"
 for ($i = 0; $i -lt $minutes; $i++) {
 
   Start-Sleep -Seconds 60
-  $myshell.sendkeys(".")
+  $myshell.sendkeys(",")
 
-  
-}  
-  
-  
+ 
+}
+
+
+ 
