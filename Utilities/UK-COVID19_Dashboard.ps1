@@ -90,7 +90,8 @@ function Show-Chart{
         "plottedCases" = $casesPlot;
         "plottednewCases" = $newCasesPlot;
         "plottedDeaths" = $deathsPlot;
-        "plottedRecovered" = $recoveredPlot
+        "plottedRecovered" = $recoveredPlot;
+        "divisor" = $divisor
     }
 
     $plottedStats = New-Object -TypeName PSObject -ArgumentList $args
@@ -114,6 +115,8 @@ Write-Host
 [int]$deaths = (Get-Cases).deaths
 [int]$recovered = (Get-Cases).recovered
 
+[int]$divisor = (Show-Chart).divisor
+
 [string]$casesGraph = (Show-Chart).plottedCases
 [string]$newCasesGraph = (Show-Chart).plottednewCases
 [string]$deathsGraph = (Show-Chart).plottedDeaths
@@ -125,7 +128,8 @@ Write-Host
 
 Clear-Host
 Write-Host "****************************************************" 
-Write-Host "************* UK COVID-19 Stats ********************" 
+Write-Host "*****       UK COVID-19 Stats              *********" 
+Write-Host "*****  Chart scale is 1:$divisor (rounded up)      *****"
 Write-Host "****************************************************" 
 Write-Host
 Write-Host "Number of days in lockdown: $lockdownDays" -ForegroundColor Cyan
@@ -136,6 +140,8 @@ Write-Host "Number of deaths: $deaths" -ForegroundColor Red
 Write-Host "Number of recovered cases: $recovered" -ForegroundColor Green
 
 Write-Host
+
+
 Write-Host "$casesGraph" -ForegroundColor Yellow
 Write-Host "$newCasesGraph" -ForegroundColor DarkCyan
 Write-Host "$deathsGraph" -ForegroundColor Red 
