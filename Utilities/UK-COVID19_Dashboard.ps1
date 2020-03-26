@@ -12,9 +12,7 @@ function Get-DaysInLockdown{
 
 }
 
-function Get-UKCases{
-
-  
+function Get-Cases{
 
     $headers=@{}
     $headers.Add("x-rapidapi-host", "covid-193.p.rapidapi.com")
@@ -24,8 +22,8 @@ function Get-UKCases{
     # get the api results.  If there's an issue try testing the net connection.
     try{
         
-        $response = Invoke-RestMethod -Uri 'https://covid-193.p.rapidapi.com/statistics?country=UK' -Method GET -Headers $headers
-    
+            $response = Invoke-RestMethod -Uri 'https://covid-193.p.rapidapi.com/statistics?country=UK' -Method GET -Headers $headers
+        
     }catch{
 
         $connection = Test-NetConnection -InformationLevel Quiet
@@ -42,28 +40,28 @@ function Get-UKCases{
 
     }
 
-    $args = @{
-        "new" = $response.response.cases.new;
-        "active" = $response.response.cases.active;
-        "critical" = $response.response.cases.critical;
-        "recovered" = $response.response.cases.recovered;
-        "total" = $response.response.cases.total;
-        "deaths" = $response.response.deaths.total;
-        "newDeaths" = $response.response.deaths.new
-    }
+        $args = @{
+            "new" = $response.response.cases.new;
+            "active" = $response.response.cases.active;
+            "critical" = $response.response.cases.critical;
+            "recovered" = $response.response.cases.recovered;
+            "total" = $response.response.cases.total;
+            "deaths" = $response.response.deaths.total;
+            "newDeaths" = $response.response.deaths.new;
+        }
 
-    $UKStats = New-Object -TypeName PSObject -ArgumentList $args
+    $Stats = New-Object -TypeName PSObject -ArgumentList $args
 
-    return $UKStats
+    return $Stats
 }
 
 function Show-Chart{
 
     
-    [int]$cases = (Get-UKCases).total
-    [int]$newCases = (Get-UKCases).new
-    [int]$deaths = (Get-UkCases).deaths
-    [int]$recovered = (Get-UKCases).recovered
+    [int]$cases = (Get-Cases).total
+    [int]$newCases = (Get-Cases).new
+    [int]$deaths = (Get-Cases).deaths
+    [int]$recovered = (Get-Cases).recovered
     
 
     # to keep chart length sensible, increase the divisor *10
@@ -104,17 +102,17 @@ function Show-Chart{
 #region write preamble
 Clear-Host
 Write-Host
-Write-Host "Fetching the UK coronavirus stats..."
+Write-Host "Fetching coronavirus stats..."
 Write-Host
 #endregion
 
 #region gather the numbers
 
 [int]$lockdownDays = Get-DaysInLockdown
-[int]$cases = (Get-UKCases).total
-[int]$newCases = (Get-UKCases).new
-[int]$deaths = (Get-UkCases).deaths
-[int]$recovered = (Get-UKCases).recovered
+[int]$cases = (Get-Cases).total
+[int]$newCases = (Get-Cases).new
+[int]$deaths = (Get-Cases).deaths
+[int]$recovered = (Get-Cases).recovered
 
 [string]$casesGraph = (Show-Chart).plottedCases
 [string]$newCasesGraph = (Show-Chart).plottednewCases
