@@ -14,15 +14,17 @@ function Get-DaysInLockdown{
 
 function Get-UKCases{
 
-    # uses daily data from a Johns Hopkins public API
-    
+  
+
     $headers=@{}
-    $headers.Add("x-rapidapi-host", "covid-19-coronavirus-statistics.p.rapidapi.com")
+    $headers.Add("x-rapidapi-host", "covid-193.p.rapidapi.com")
     $headers.Add("x-rapidapi-key", "56135d0f0dmshe43ede3f1c57ba4p16ac9fjsnf43b7663248c")
+    
 
     # get the api results.  If there's an issue try testing the net connection.
     try{
-        $response = Invoke-RestMethod -Uri 'https://covid-19-coronavirus-statistics.p.rapidapi.com/v1/stats?country=United Kingdom' -Method GET -Headers $headers
+        
+        $response = Invoke-RestMethod -Uri 'https://covid-193.p.rapidapi.com/statistics?country=UK' -Method GET -Headers $headers
     
     }catch{
 
@@ -40,26 +42,29 @@ function Get-UKCases{
 
     }
 
-
-    $stats = $response.data.covid19Stats | where-object {$_.province -eq ""}
-
     $args = @{
-        "cases" = $stats.confirmed;
-        "deaths" = $stats.deaths;
-        "recovered" = $stats.recovered;
+        "new" = $response.response.cases.new;
+        "active" = $response.response.cases.active;
+        "critical" = $response.response.cases.critical;
+        "recovered" = $response.response.cases.recovered;
+        "total" = $response.response.cases.total;
+        "deaths" = $response.response.deaths.total;
+        "newDeaths" = $response.response.deaths.new
     }
 
     $UKStats = New-Object -TypeName PSObject -ArgumentList $args
 
     return $UKStats
-
 }
 
 function Show-Chart{
 
-    $cases = (Get-UKCases).cases
-    $deaths = (Get-UkCases).deaths
-    $recovered = (Get-UKCases).recovered
+    
+    [int]$cases = (Get-UKCases).total
+    [int]$newCases = (Get-UKCases).new
+    [int]$deaths = (Get-UkCases).deaths
+    [int]$recovered = (Get-UKCases).recovered
+    
 
     # to keep chart length sensible, increase the divisor *10
     if($cases -lt 15000){
@@ -73,16 +78,19 @@ function Show-Chart{
 
     # round up so that we always show a plot point if the number is > 0
     [int]$casesConverted = [Math]::Round([Math]::Ceiling($cases / $divisor))
+    [int]$newCasesConverted = [Math]::Round([Math]::Ceiling($newCases / $divisor))
     [int]$deathsConverted = [Math]::Round([Math]::Ceiling($deaths / $divisor))
     [int]$recoveredConverted = [Math]::Round([Math]::Ceiling($recovered / $divisor))
 
-    [string]$casesPlot = "C" * $casesConverted
-    [string]$deathsPlot = "D" * $deathsConverted
-    [string]$recoveredPlot = "R" * $recoveredConverted
+    [string]$casesPlot = "c" * $casesConverted
+    [string]$newCasesPlot = "n" * $newCasesConverted
+    [string]$deathsPlot = "d" * $deathsConverted
+    [string]$recoveredPlot = "r" * $recoveredConverted
 
     $args = @{
 
         "plottedCases" = $casesPlot;
+        "plottednewCases" = $newCasesPlot;
         "plottedDeaths" = $deathsPlot;
         "plottedRecovered" = $recoveredPlot
     }
@@ -103,11 +111,13 @@ Write-Host
 #region gather the numbers
 
 [int]$lockdownDays = Get-DaysInLockdown
-[int]$cases = (Get-UKCases).cases
+[int]$cases = (Get-UKCases).total
+[int]$newCases = (Get-UKCases).new
 [int]$deaths = (Get-UkCases).deaths
 [int]$recovered = (Get-UKCases).recovered
 
 [string]$casesGraph = (Show-Chart).plottedCases
+[string]$newCasesGraph = (Show-Chart).plottednewCases
 [string]$deathsGraph = (Show-Chart).plottedDeaths
 [string]$recoveredGraph = (Show-Chart).plottedRecovered
 
@@ -123,12 +133,14 @@ Write-Host
 Write-Host "Number of days in lockdown: $lockdownDays" -ForegroundColor Cyan
 Write-Host
 Write-Host "Number of cases: $cases" -ForegroundColor Yellow
+Write-Host "Number of new cases: $newCases" -ForegroundColor DarkCyan
 Write-Host "Number of deaths: $deaths" -ForegroundColor Red
 Write-Host "Number of recovered cases: $recovered" -ForegroundColor Green
 
 Write-Host
 Write-Host "$casesGraph" -ForegroundColor Yellow
-Write-Host "$deathsGraph" -ForegroundColor Red
+Write-Host "$newCasesGraph" -ForegroundColor DarkCyan
+Write-Host "$deathsGraph" -ForegroundColor Red 
 Write-Host "$recoveredGraph" -ForegroundColor Green
 Write-Host
 
