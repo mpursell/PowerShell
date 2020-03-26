@@ -100,56 +100,111 @@ function Show-Chart{
 
 }
 
-#region write preamble
-Clear-Host
-Write-Host
-Write-Host "Fetching coronavirus stats..."
-Write-Host
-#endregion
+function Show-COVIDCases{
 
-#region gather the numbers
+    param(
+        [switch]$WindowsChart
+    )
 
-[int]$lockdownDays = Get-DaysInLockdown
-[int]$cases = (Get-Cases).total
-[int]$newCases = (Get-Cases).new
-[int]$deaths = (Get-Cases).deaths
-[int]$recovered = (Get-Cases).recovered
+    #region write preamble
+    Clear-Host
+    Write-Host
+    Write-Host "Fetching coronavirus stats..."
+    Write-Host
+    #endregion
 
-[int]$divisor = (Show-Chart).divisor
+    #region gather the numbers
 
-[string]$casesGraph = (Show-Chart).plottedCases
-[string]$newCasesGraph = (Show-Chart).plottednewCases
-[string]$deathsGraph = (Show-Chart).plottedDeaths
-[string]$recoveredGraph = (Show-Chart).plottedRecovered
+    [int]$lockdownDays = Get-DaysInLockdown
+    [int]$cases = (Get-Cases).total
+    [int]$newCases = (Get-Cases).new
+    [int]$deaths = (Get-Cases).deaths
+    [int]$recovered = (Get-Cases).recovered
 
-#endregion
+    [int]$divisor = (Show-Chart).divisor
 
-#region write the output
+    [string]$casesGraph = (Show-Chart).plottedCases
+    [string]$newCasesGraph = (Show-Chart).plottednewCases
+    [string]$deathsGraph = (Show-Chart).plottedDeaths
+    [string]$recoveredGraph = (Show-Chart).plottedRecovered
 
-Clear-Host
-Write-Host "****************************************************" 
-Write-Host "*****       UK COVID-19 Stats              *********" 
-Write-Host "*****  Chart scale is 1:$divisor (rounded up)      *****"
-Write-Host "****************************************************" 
-Write-Host
-Write-Host "Number of days in lockdown: $lockdownDays" -ForegroundColor Cyan
-Write-Host
-Write-Host "Number of cases: $cases" -ForegroundColor Yellow
-Write-Host "Number of new cases: $newCases" -ForegroundColor DarkCyan
-Write-Host "Number of deaths: $deaths" -ForegroundColor Red
-Write-Host "Number of recovered cases: $recovered" -ForegroundColor Green
+    #endregion
 
-Write-Host
+    
+    #region write the output
+    if($WindowsChart){
+
+        [void][Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+        [void][Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms.DataVisualization")
+
+        # create chart object
+        $Chart = New-object System.Windows.Forms.DataVisualization.Charting.Chart
+        $Chart.Width = 500
+        $Chart.Height = 400
+        $Chart.Left = 40
+        $Chart.Top = 30
+
+        # create a chartarea to draw on and add to chart
+        $ChartArea = New-Object System.Windows.Forms.DataVisualization.Charting.ChartArea
+        $Chart.ChartAreas.Add($ChartArea)
+
+        # add data to chart
+        $data = @{"New Cases"=$newCases;"Total Cases"=$cases; "Deaths"=$deaths;"Recoveries"=$recovered}
+        [void]$Chart.Series.Add("Data")
+        $Chart.Series["Data"].Points.DataBindXY($data.Keys, $data.Values)
+
+        # display the chart on a form
+        $Chart.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right -bor
+        [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+        $Form = New-Object Windows.Forms.Form
+        $Form.Text = "COVID-19 Chart"
+        $Form.Width = 600
+        $Form.Height = 600
+        $Form.controls.add($Chart)
+        $Form.Add_Shown({$Form.Activate()})
+        $Form.ShowDialog()
+
+        [void]$Chart.Titles.Add("COVID-19 Cases, deaths & recoveries")
+
+        # change chart area colour
+        $Chart.BackColor = [System.Drawing.Color]::Transparent
+        
 
 
-Write-Host "$casesGraph" -ForegroundColor Yellow
-Write-Host "$newCasesGraph" -ForegroundColor DarkCyan
-Write-Host "$deathsGraph" -ForegroundColor Red 
-Write-Host "$recoveredGraph" -ForegroundColor Green
-Write-Host
+    }else{
 
-#endregion
 
+        
+
+        Clear-Host
+        Write-Host "****************************************************" 
+        Write-Host "*****       UK COVID-19 Stats              *********" 
+        Write-Host "*****  Chart scale is 1:$divisor (rounded up)      *****"
+        Write-Host "****************************************************" 
+        Write-Host
+        Write-Host "Number of days in lockdown: $lockdownDays" -ForegroundColor Cyan
+        Write-Host
+        Write-Host "Number of cases: $cases" -ForegroundColor Yellow
+        Write-Host "Number of new cases: $newCases" -ForegroundColor DarkCyan
+        Write-Host "Number of deaths: $deaths" -ForegroundColor Red
+        Write-Host "Number of recovered cases: $recovered" -ForegroundColor Green
+
+        Write-Host
+
+
+        Write-Host "$casesGraph" -ForegroundColor Yellow
+        Write-Host "$newCasesGraph" -ForegroundColor DarkCyan
+        Write-Host "$deathsGraph" -ForegroundColor Red 
+        Write-Host "$recoveredGraph" -ForegroundColor Green
+        Write-Host
+
+    
+    }
+    #endregion
+}
+
+#Show-COVIDCases -WindowsChart 
+Show-COVIDCases
 
     
 
