@@ -23,6 +23,7 @@ function Get-Cases{
     try{
         
             $response = Invoke-RestMethod -Uri 'https://covid-193.p.rapidapi.com/statistics?country=UK' -Method GET -Headers $headers
+            $responseAll = Invoke-RestMethod -Uri 'https://covid-193.p.rapidapi.com/statistics?country=ALL' -Method GET -Headers $headers
         
     }catch{
 
@@ -41,6 +42,7 @@ function Get-Cases{
     }
 
         $args = @{
+            "world" = $responseAll.response.cases.active
             "new" = $response.response.cases.new;
             "active" = $response.response.cases.active;
             "critical" = $response.response.cases.critical;
@@ -103,7 +105,8 @@ function Show-Chart{
 function Show-COVIDCases{
 
     param(
-        [switch]$WindowsChart
+        [switch]$WindowsChart,
+        [string]$Country
     )
 
     #region write preamble
@@ -117,6 +120,7 @@ function Show-COVIDCases{
 
     [int]$lockdownDays = Get-DaysInLockdown
     [int]$cases = (Get-Cases).total
+    [int]$worldCases = (Get-Cases).world
     [int]$newCases = (Get-Cases).new
     [int]$deaths = (Get-Cases).deaths
     [int]$recovered = (Get-Cases).recovered
@@ -149,7 +153,7 @@ function Show-COVIDCases{
         $Chart.ChartAreas.Add($ChartArea)
 
         # add data to chart
-        $data = @{"New Cases"=$newCases;"Total Cases"=$cases; "Deaths"=$deaths;"Recoveries"=$recovered}
+        $data = @{"World Cases"=$worldCases;"New $Country Cases"=$newCases;"Total $Country Cases"=$cases; "$Country Deaths"=$deaths;"$Country Recoveries"=$recovered}
         [void]$Chart.Series.Add("Data")
         $Chart.Series["Data"].Points.DataBindXY($data.Keys, $data.Values)
 
@@ -178,16 +182,17 @@ function Show-COVIDCases{
 
         Clear-Host
         Write-Host "****************************************************" 
-        Write-Host "*****       UK COVID-19 Stats              *********" 
+        Write-Host "*****       $Country COVID-19 Stats              *********" 
         Write-Host "*****  Chart scale is 1:$divisor (rounded up)      *****"
         Write-Host "****************************************************" 
         Write-Host
-        Write-Host "Number of days in lockdown: $lockdownDays" -ForegroundColor Cyan
+        Write-Host "World cases: $worldCases" -BackgroundColor Red
         Write-Host
-        Write-Host "Number of cases: $cases" -ForegroundColor Yellow
-        Write-Host "Number of new cases: $newCases" -ForegroundColor DarkCyan
-        Write-Host "Number of deaths: $deaths" -ForegroundColor Red
-        Write-Host "Number of recovered cases: $recovered" -ForegroundColor Green
+        Write-Host "Number of $Country days in lockdown: $lockdownDays" -ForegroundColor Cyan
+        Write-Host "Number of $Country cases: $cases" -ForegroundColor Yellow
+        Write-Host "Number of new $Country cases: $newCases" -ForegroundColor DarkCyan
+        Write-Host "Number of $Country deaths: $deaths" -ForegroundColor Red
+        Write-Host "Number of $Country recovered cases: $recovered" -ForegroundColor Green
 
         Write-Host
 
@@ -204,7 +209,7 @@ function Show-COVIDCases{
 }
 
 #Show-COVIDCases -WindowsChart 
-Show-COVIDCases
+Show-COVIDCases -Country "UK" 
 
     
 
